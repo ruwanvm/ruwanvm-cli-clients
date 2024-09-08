@@ -1,0 +1,49 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3.9-slim' // Use a Python Docker image
+            args "-v /var/run/docker.sock:/var/run/docker.sock -u 989:985"
+        }
+    }
+    environment {
+        PIP_CACHE_DIR = "${WORKSPACE}/.pip"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/ruwanvm/ruwanvm-cli-clients.git'
+            }
+        }
+        stage('Check python version') {
+            steps {
+                sh 'which python'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r tests/requirements.txt --user'
+            }
+        }
+        stage('Run Flake8 lints') {
+            steps {
+                sh 'flake8 --ignore="E501" totara/'
+            }
+        }
+        stage('Run Unit Tests') {
+            steps {
+                sh 'python -m unittest discover -s tests'
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            echo "Tests failed!"
+        }
+        success {
+            echo "Tests passed!"
+        }
+    }
+}

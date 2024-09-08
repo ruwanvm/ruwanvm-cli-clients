@@ -1,0 +1,4 @@
+# unittest and mock are standard modules from python 3.6 onwards
+pytz~=2024.1
+flake8~=7.1.1
+requests>=2.32.0
